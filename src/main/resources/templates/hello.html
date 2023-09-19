@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Tool</title>
+</head>
+<body>
+    <h1 style="text-align: center;">Kubernetes Cluster</h1>
+    <h1 style="text-align: center;">Security Analysis Tool</h1>
+
+    <div class="height-text" style="text-align: center;">
+        <strong>&nbsp; &nbsp; &nbsp;Customer&nbsp; &nbsp; <input type="text" required></strong>
+    </div>
+    <form action="/runcurl" method="post">
+    <div class="height-text" style="text-align: center;">
+        <strong>API-Server IP&nbsp; &nbsp;<input type="text" id="apiServer" name="apiServer" required></strong>
+    </div>
+
+    <div class="height-text" style="text-align: center;">
+        <strong>&nbsp; &nbsp; &nbsp; &nbsp;Token&nbsp; &nbsp; &nbsp; &nbsp;<input type="text" id="token" name="token" required></strong>
+    </div>
+    <div style="text-align: center;">
+        &nbsp; &nbsp; &nbsp; &nbsp;<input type="submit" value="Run curl">
+    </div>
+    </form>
+    <p style="text-align: center;">&nbsp;</p>
+
+    <div class="height-text" style="text-align: center;">
+        <textarea style="height: 177px; width: 604px;" readonly="readonly">{{ result }}</textarea>
+    </div>
+
+</body>
+</html>
