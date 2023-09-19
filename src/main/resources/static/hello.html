@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue.js Form Example</title>
+</head>
+<body>
+<div id="app">
+    <h1 style="text-align: center;">Kubernetes Cluster</h1>
+    <h1 style="text-align: center;">Security Analysis Tool</h1>
+
+    <div class="height-text" style="text-align: center;">
+        <strong>&nbsp; &nbsp; &nbsp;Customer&nbsp; &nbsp; <input type="text" v-model="customer"></strong>
+    </div>
+
+    <div class="height-text" style="text-align: center;">
+        <strong>API-Server IP&nbsp; &nbsp;&nbsp;<input type="text" v-model="apiServer"></strong>
+    </div>
+
+    <div class="height-text" style="text-align: center;">
+        <strong>&nbsp; &nbsp; &nbsp; &nbsp;Token&nbsp; &nbsp; &nbsp; &nbsp;<input type="text" v-model="token"></strong>
+    </div>
+
+    <h1 style="text-align: center;">
+        <button @click="saveData">Run</button>
+    </h1>
+
+    <p style="text-align: center;">&nbsp;</p>
+
+    <div class="height-text" style="text-align: center;">
+        <textarea style="height: 177px; width: 604px;" readonly="readonly">{{ result }}</textarea>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            customer: "",
+            apiServer: "",
+            token: "",
+            result: ""
+        },
+        methods: {
+            saveData() {
+                // 입력된 데이터를 서버로 전송 (여기서는 결과를 화면에 표시하는 예제)
+                const resultText = `Customer: ${this.customer}\nAPI-Server IP: ${this.apiServer}\nToken: ${this.token}`;
+                this.result = resultText;
+            }
+        }
+    });
+</script>
+</body>
+</html>
