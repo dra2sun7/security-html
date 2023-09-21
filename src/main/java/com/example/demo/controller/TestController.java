@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.service.KubernetesService;
@@ -17,15 +18,17 @@ public class TestController {
         this.kubernetesService = kubernetesService;
     }
 
-    @RequestMapping(value = "/home")
+    @GetMapping(value = "/home")
     public String home(){
         return "hello";
     }
 
-    @PostMapping(value = "/printNodes")
-    public String printNodes(@RequestParam String apiserver, @RequestParam String token, Model model) {
-        List<String> nodeNames = kubernetesService.getNodeNames(apiserver, token);
+    @PostMapping("/runCurl")
+    public String runCurl(@RequestParam String apiServer, @RequestParam String token, Model model){
+        List<String> nodeNames = kubernetesService.getNodeNames(apiServer, token);
+
         model.addAttribute("nodeNames", nodeNames);
+
         return "hello";
     }
 }

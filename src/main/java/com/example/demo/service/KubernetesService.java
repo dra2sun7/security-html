@@ -13,9 +13,9 @@ import java.util.List;
 
 @Service
 public class KubernetesService {
-    public List<String> getNodeNames(String apiserver, String token) {
+    public List<String> getNodeNames(String apiServer, String token) {
         Config config = new ConfigBuilder()
-                .withMasterUrl(apiserver)
+                .withMasterUrl(apiServer)
                 .withOauthToken(token)
                 .build();
 
