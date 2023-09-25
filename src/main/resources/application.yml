@@ -1,10 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: my-job
+  name: ${nodeName}-kubeBench
 spec:
   template:
     spec:
+      nodeName: ${nodeName}
       containers:
       - name: my-container
         image: nginx:latest
