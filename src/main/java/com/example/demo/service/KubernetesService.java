@@ -6,20 +6,24 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import org.springframework.core.io.Resource;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayInputStream;
+import java.util.List;
+
 
 @Service
 public class KubernetesService {
 
     public void deployJobFromYaml(String apiServer, String token) {
-        // Initialize the Kubernetes client
         Config config = new ConfigBuilder()
                 .withMasterUrl(apiServer)
                 .withOauthToken(token)
@@ -27,13 +31,21 @@ public class KubernetesService {
                 .build();
 
         try (KubernetesClient kubernetesClient = new DefaultKubernetesClient(config)) {
-            // Load the YAML file from Spring Boot's resources
-            try (InputStream inputStream = new ClassPathResource("application.yaml").getInputStream()) {
-                String yamlTemplate = loadYamlTemplate(inputStream);
-
+            try {
+                String yamlTemplate = loadYamlTemplateFromFile();
                 String yamlContent = yamlTemplate.replace("${nodeName}", "worker1");
 
-                Job job = (Job) kubernetesClient.load(inputStream).get();
+                InputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
+
+                List<HasMetadata> resources = kubernetesClient.load(inputStream).get();
+
+                Job job = null;
+                for (HasMetadata resource : resources) {
+                    if (resource instanceof Job) {
+                        job = (Job) resource;
+                        break;
+                    }
+                }
 
                 kubernetesClient.batch().v1().jobs().inNamespace("default").create(job);
 
@@ -47,13 +59,10 @@ public class KubernetesService {
         }
     }
 
-    private String loadYamlTemplate(InputStream inputStream) {
-        try {
+    private String loadYamlTemplateFromFile() throws IOException {
+        try (InputStream inputStream = getClass().getResourceAsStream("/application.yml")) {
             byte[] bytes = StreamUtils.copyToByteArray(inputStream);
             return new String(bytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }
