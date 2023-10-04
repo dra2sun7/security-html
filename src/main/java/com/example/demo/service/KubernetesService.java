@@ -51,7 +51,6 @@ public class KubernetesService {
                     String log = null;
                     for (Pod pod : podList.getItems()) {
                         String podName = pod.getMetadata().getName();
-                        System.out.println(nodeName+"kubebench");
                         if (podName.startsWith(nodeName+"kubebench")) {
                             log = kubernetesClient.pods().inNamespace("default").withName(podName).getLog();
                             System.out.println(log);
