@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import io.fabric8.kubernetes.api.model.Node;
+import io.fabric8.kubernetes.api.model.NodeList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -25,16 +27,22 @@ public class KubernetesService {
                 .withNamespace("default")
                 .build();
 
+
         try (KubernetesClient kubernetesClient = new DefaultKubernetesClient(config)) {
             try {
-                String yamlTemplate = loadYamlTemplateFromFile();
-                String yamlContent = yamlTemplate.replace("${nodeName}", "worker1");
-                System.out.println("yaml 파일의 내용 : \n"+yamlContent);
-                InputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
+                NodeList nodeList = kubernetesClient.nodes().list();
 
-                kubernetesClient.load(inputStream).create();
-                System.out.println("Job created successfully.");
-                inputStream.close();
+                for (Node node : nodeList.getItems()) {
+                    String nodeName = node.getMetadata().getName();
+                    String yamlTemplate = loadYamlTemplateFromFile();
+                    String yamlContent = yamlTemplate.replace("${nodeName}", nodeName);
+                    System.out.println("yaml 파일의 내용 : \n" + yamlContent);
+                    InputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
+
+                    kubernetesClient.load(inputStream).create();
+                    System.out.println("Job created successfully.");
+                    inputStream.close();
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
