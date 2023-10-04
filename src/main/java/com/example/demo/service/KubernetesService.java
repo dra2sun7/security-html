@@ -2,16 +2,15 @@ package com.example.demo.service;
 
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.ConfigBuilder;d
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.Resource;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.Node;
+import io.fabric8.kubernetes.api.model.NodeList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,28 +29,40 @@ public class KubernetesService {
                 .withTrustCerts(true)
                 .build();
 
+
         try (KubernetesClient kubernetesClient = new DefaultKubernetesClient(config)) {
-            try {
-                String yamlTemplate = loadYamlTemplateFromFile();
-                String yamlContent = yamlTemplate.replace("${nodeName}", "worker1");
+            NodeList nodeList = kubernetesClient.nodes().list();
 
-                InputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
+            for (Node node : nodeList.getItems()) {
+                try {
+                    String nodeName = node.getMetadata().getName();
+                    String yamlTemplate = loadYamlTemplateFromFile();
+                    String yamlContent = yamlTemplate.replace("${nodeName}", nodeName);
 
-                List<HasMetadata> resources = kubernetesClient.load(inputStream).get();
+                    InputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
 
-                Job job = null;
-                for (HasMetadata resource : resources) {
-                    if (resource instanceof Job) {
-                        job = (Job) resource;
-                        break;
+                    List<HasMetadata> resources = kubernetesClient.load(inputStream).get();
+
+                    Job job = null;
+                    for (HasMetadata resource : resources) {
+                        if (resource instanceof Job) {
+                            job = (Job) resource;
+                            break;
+                        }
                     }
+
+
+                    kubernetesClient.batch().v1().jobs().inNamespace("default").create(job);
+
+                    System.out.println("Job created successfully.");
+
+                    String log = kubernetesClient.pods().inNamespace("default").withName(nodeName+"KubeBench").tailingLines(100).getLog();
+                    System.out.println("Logs: ");
+                    System.out.println(log);
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-
-                kubernetesClient.batch().v1().jobs().inNamespace("default").create(job);
-
-                System.out.println("Job created successfully.");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         } catch (KubernetesClientException e) {
             e.printStackTrace();
