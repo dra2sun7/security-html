@@ -1,7 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
+<<<<<<< HEAD
   name: ${nodeName}kube
+=======
+  name: ${nodeName}KubeBench
+>>>>>>> 3ce8db97b28df6b3ece1c5f0398e9bf4033baf17
 spec:
   template:
     spec:
