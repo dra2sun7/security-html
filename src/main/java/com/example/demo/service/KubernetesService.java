@@ -18,19 +18,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayInputStream;
+<<<<<<< HEAD
+=======
+import java.util.ArrayList;
+import java.util.List;
+>>>>>>> bea857b (1013 front first)
 
 
 @Service
 public class KubernetesService {
 
-    public void deployJobFromYaml(String apiServer, String token) {
+    public List<String> deployJobFromYaml(String apiServer, String token) {
+        List<String> logMessage = new ArrayList<>();
         Config config = new ConfigBuilder()
                 .withMasterUrl(apiServer)
                 .withOauthToken(token)
                 .withTrustCerts(true)
                 .withNamespace("default")
                 .build();
-
 
         try (KubernetesClient kubernetesClient = new DefaultKubernetesClient(config)) {
             try {
@@ -43,7 +48,11 @@ public class KubernetesService {
                     InputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
 
                     kubernetesClient.load(inputStream).create();
+<<<<<<< HEAD
                     System.out.println("==============   " + nodeName+"Job created successfully.   ==============");
+=======
+                    logMessage.add("==============   "+nodeName+" Job information.   ==============");
+>>>>>>> bea857b (1013 front first)
                     inputStream.close();
 
                     waitForJobCompletion(kubernetesClient, nodeName+"kubebench");
@@ -54,19 +63,29 @@ public class KubernetesService {
                         String podName = pod.getMetadata().getName();
                         if (podName.startsWith(nodeName+"kubebench")) {
                             log = kubernetesClient.pods().inNamespace("default").withName(podName).getLog();
+<<<<<<< HEAD
                             System.out.println(log);
+=======
+                            logMessage.add(log);
+>>>>>>> bea857b (1013 front first)
                             break;
                         }
                     }
                     deleteJob(kubernetesClient,nodeName+"kubebench");
                 }
             } catch (IOException e) {
+<<<<<<< HEAD
+=======
+                logMessage.add("There is a trouble with Cluster");
+>>>>>>> bea857b (1013 front first)
                 throw new RuntimeException(e);
             }
         } catch (KubernetesClientException e) {
+            logMessage.add("There is a trouble with Cluster");
             e.printStackTrace();
             // Handle Kubernetes client errors
         }
+        return logMessage;
     }
 
     private String loadYamlTemplateFromFile() throws IOException {
@@ -99,7 +118,10 @@ public class KubernetesService {
                 }
             }
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> bea857b (1013 front first)
         if (jobCompleted) {
             System.out.println("Job completed successfully.");
         } else {
@@ -116,4 +138,8 @@ public class KubernetesService {
             System.err.println("Error while deleting Job.");
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> bea857b (1013 front first)

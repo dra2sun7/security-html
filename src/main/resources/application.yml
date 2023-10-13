@@ -82,4 +82,8 @@ spec:
           name: etc-cni-netd
         - hostPath:
             path: /opt/cni/bin/
+<<<<<<< HEAD
           name: opt-cni-bin
+=======
+          name: opt-cni-bin
+>>>>>>> bea857b (1013 front first)
