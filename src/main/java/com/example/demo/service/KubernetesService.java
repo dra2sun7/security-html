@@ -6,11 +6,8 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobStatus;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.*;
+import io.fabric8.kubernetes.client.dsl.LogWatch;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
@@ -18,18 +15,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayInputStream;
-<<<<<<< HEAD
-=======
+
 import java.util.ArrayList;
 import java.util.List;
->>>>>>> bea857b (1013 front first)
-
 
 @Service
 public class KubernetesService {
-
+    private LogWatch logWatch;
     public List<String> deployJobFromYaml(String apiServer, String token) {
         List<String> logMessage = new ArrayList<>();
+
         Config config = new ConfigBuilder()
                 .withMasterUrl(apiServer)
                 .withOauthToken(token)
@@ -48,36 +43,40 @@ public class KubernetesService {
                     InputStream inputStream = new ByteArrayInputStream(yamlContent.getBytes());
 
                     kubernetesClient.load(inputStream).create();
-<<<<<<< HEAD
+
+                    logWatch = logWatch(kubernetesClient, nodeName+"kubebench");
+
                     System.out.println("==============   " + nodeName+"Job created successfully.   ==============");
-=======
+
                     logMessage.add("==============   "+nodeName+" Job information.   ==============");
->>>>>>> bea857b (1013 front first)
+                    
                     inputStream.close();
 
                     waitForJobCompletion(kubernetesClient, nodeName+"kubebench");
-
+                    if (logWatch != null) {
+                        logWatch.close();
+                    }
                     PodList podList = kubernetesClient.pods().inNamespace("default").list();
                     String log = null;
                     for (Pod pod : podList.getItems()) {
                         String podName = pod.getMetadata().getName();
                         if (podName.startsWith(nodeName+"kubebench")) {
+
                             log = kubernetesClient.pods().inNamespace("default").withName(podName).getLog();
-<<<<<<< HEAD
+
                             System.out.println(log);
-=======
+
                             logMessage.add(log);
->>>>>>> bea857b (1013 front first)
+
                             break;
                         }
                     }
                     deleteJob(kubernetesClient,nodeName+"kubebench");
                 }
             } catch (IOException e) {
-<<<<<<< HEAD
-=======
+
                 logMessage.add("There is a trouble with Cluster");
->>>>>>> bea857b (1013 front first)
+
                 throw new RuntimeException(e);
             }
         } catch (KubernetesClientException e) {
@@ -118,15 +117,15 @@ public class KubernetesService {
                 }
             }
         }
-<<<<<<< HEAD
-
-=======
->>>>>>> bea857b (1013 front first)
         if (jobCompleted) {
             System.out.println("Job completed successfully.");
         } else {
             System.err.println("Timeout waiting for Job completion.");
         }
+    }
+
+    private LogWatch logWatch(KubernetesClient kubernetesClient, String podName) {
+        return kubernetesClient.pods().inNamespace("default").withName(podName).watchLog(System.out);
     }
     private void deleteJob(KubernetesClient kubernetesClient, String jobName) {
         try {
@@ -138,8 +137,4 @@ public class KubernetesService {
             System.err.println("Error while deleting Job.");
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> bea857b (1013 front first)
